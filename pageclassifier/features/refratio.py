@@ -1,6 +1,7 @@
 import refclassifier as rc
 import csv
 from wikirefs.bibliography import Bibliography
+import numpy as np
 
 
 def pull_refs(wcode):
@@ -22,12 +23,17 @@ class FeatureExtractor(object):
         return self.extract(page_text_list)
 
     def extract(self, wikicode_list):
-        return [self._calc_ref_ratio(wcode) for wcode in wikicode_list]
+        return np.array(
+                    [[self._calc_ref_ratio(wcode)] for wcode in wikicode_list]
+                    )
 
     def _calc_ref_ratio(self, wcode):
         refs_counts = pull_refs(wcode)
         refs = [r['ref'] for r in refs]
         count = [r['count'] for r in refs]
         predictions = self._clf.predict([r for r in refs])
-        positives = sum(c*p for c, p in zip(count, predictions))
-        return positives / sum(count)
+        positives = sum([c*p for c, p in zip(count, predictions)])
+        total = sum(count)
+        if total == 0:
+            total = 1
+        return positives / total
