@@ -1,0 +1,10 @@
+mwapi==0.4.1
+mwparserfromhell==0.4.3
+numpy==1.11.1
+pkg-resources==0.0.0
+PyYAML==3.11
+-e git+git@github.com:kjschiroo/wikirefclassify.git@8e403d91e06201c288650a5e13357ca318c2c93c#egg=refclassifier
+requests==2.10.0
+scikit-learn==0.17.1
+scipy==0.18.0
+-e git+git@github.com:kjschiroo/wikirefs.git@d979c4c7cc0ce8e0459558e803ebed236ac5f55d#egg=wikirefs
