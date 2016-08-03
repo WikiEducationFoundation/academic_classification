@@ -1,0 +1,13 @@
+training_file: training_data/academic_revision_data.csv
+feature:
+  - name: ref_ratio
+    class: features.refratio.FeatureExtractor
+    init_args:
+      training_file: training_data/training_refs.csv
+  - name: first_n_words
+    class: features.firstnwords.FeatureExtractor
+    init_args:
+      n: 40
+  - name: infobox
+    class: features.infobox.FeatureExtractor
+    init_args: {}
