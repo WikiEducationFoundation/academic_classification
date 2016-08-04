@@ -24,10 +24,10 @@ class FeatureExtractor(object):
     def fit_extract(self, wikicode_list):
         self._vectorizer = TfidfVectorizer(min_df=0.02)
         transformed = _transform(wikicode_list)
-        X = self._vectorizer.fit_transform(first_n_words)
-        return X
+        X = self._vectorizer.fit_transform(transformed)
+        return X.toarray()
 
     def extract(self, wikicode_list):
         transformed = _transform(wikicode_list)
-        X = self._vectorizer.transform(first_n_words)
-        return X
+        X = self._vectorizer.transform(transformed)
+        return X.toarray()

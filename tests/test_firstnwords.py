@@ -1,6 +1,7 @@
 import unittest
 import mwparserfromhell as mwp
 import pageclassifier.features.firstnwords as fnw
+from . import utilities as utils
 
 
 class FirstNWordsTest(unittest.TestCase):
@@ -34,3 +35,12 @@ class FirstNWordsTest(unittest.TestCase):
         self.assertEqual(result[1], 'Text2')
         self.assertEqual(result[2], 'text3')
         self.assertEqual(result[3], 'text4')
+
+    def test_no_error_on_basic_usage(self):
+        texts = utils.get_cached_revisions()
+        wcode_list = [mwp.parse(text) for text in texts.values()]
+        n = 30
+        extractor = fnw.FeatureExtractor(n)
+
+        extractor.fit_extract(wcode_list)
+        extractor.extract(wcode_list)

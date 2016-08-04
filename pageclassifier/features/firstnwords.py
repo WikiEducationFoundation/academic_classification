@@ -56,15 +56,15 @@ class FeatureExtractor(object):
         self._vectorizer = None
 
     def fit_extract(self, wikicode_list):
-        first_n_words = _transform(n, wcode)
+        first_n_words = _transform(self._n, wikicode_list)
         self._vectorizer = TfidfVectorizer(min_df=0.02)
         X = self._vectorizer.fit_transform(first_n_words)
-        return X
+        return X.toarray()
 
     def extract(self, wikicode_list):
-        first_n_words = _transform(n, wcode)
+        first_n_words = _transform(self._n, wikicode_list)
         X = self._vectorizer.transform(first_n_words)
-        return X
+        return X.toarray()
 
     def _select_first_n_words_from_wikicode(self, wikicode):
         first_words = []

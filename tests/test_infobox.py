@@ -1,6 +1,7 @@
 import unittest
 import mwparserfromhell as mwp
 import pageclassifier.features.infobox as ifb
+from . import utilities as utils
 
 
 class InfoboxTest(unittest.TestCase):
@@ -29,3 +30,11 @@ class InfoboxTest(unittest.TestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0], 'infobox-something infobox-again')
         self.assertEqual(result[1], 'infobox-num1 infobox-num2')
+
+    def test_no_error_on_basic_usage(self):
+        texts = utils.get_cached_revisions()
+        wcode_list = [mwp.parse(text) for text in texts.values()]
+        extractor = ifb.FeatureExtractor()
+
+        extractor.fit_extract(wcode_list)
+        extractor.extract(wcode_list)

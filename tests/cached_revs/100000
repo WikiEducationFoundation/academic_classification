@@ -1,0 +1,18 @@
+'''Potential Flow'', also know as '''Incompressible Flow''' or '''Irrotational Flow''' in [[Fluid mechanics]] is flow defined by the equations
+
+ &grad; &cross; '''v''' = 0    (zero rotation = no shear)
+
+ &grad; &dot; '''v''' = 0      (zero divergence = continuity)
+
+Equivalently,
+
+  '''v''' = &grad; &Phi;
+
+  v vector fluid velocity
+  &Phi; fluid flow potential, scalar
+
+Together with the [[Navier-Stokes equations]], these equations can be used to calculate solutions to many practical flow situations.
+
+See also
+* http://www.mas.ncl.ac.uk/~sbrooks/book/nish.mit.edu/2006/Textbook/
+* http://www.idra.unige.it/~irro/lecture_e.html
