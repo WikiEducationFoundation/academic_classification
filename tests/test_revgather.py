@@ -11,8 +11,4 @@ class RevGatherTest(unittest.TestCase):
 
         revs = rg.get_text_for_revisions(revids)
 
-        inpt = set(revids)
-        out = set(revs.keys())
-        not_there = inpt.difference(out)
-
         self.assertEqual(len(revids), len(revs))

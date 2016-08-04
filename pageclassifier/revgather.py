@@ -21,7 +21,7 @@ def get_text_for_revisions(revids):
             try:
                 texts.update(_try_get_text_for_revisions(revid_chunk))
                 break
-            except ConnectionError as e:
+            except mwapi.errors.ConnectionError as e:
                 if i > 5:
                     raise e
                 else:
