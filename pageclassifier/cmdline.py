@@ -7,18 +7,27 @@ import revgather as rg
 import csv
 import mwparserfromhell as mwp
 import logging
+import itertools
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 
-def build_classifier(config_file):
+def _group(n, iterable):
+    it = iter(iterable)
+    while True:
+        chunk = tuple(itertools.islice(it, n))
+        if not chunk:
+            return
+        yield chunk
+
+
+def build_classifier(config):
     logger.info('Starting page classifier build')
 
     logger.info('Gathering feature extractors')
     features_extractors = []
-    config = yaml.load(config_file)
     extractors = _gather_feature_extractors(config['feature'])
     clf = pc.PageClassifier(extractors)
 
@@ -58,8 +67,30 @@ def _gather_feature_extractors(features):
     return features_extractors
 
 
-def classify(config, infile, outfile):
-    build_classifier(config)
+def classify(config_file, infile, outfile):
+    config = yaml.load(config_file)
+    clf = build_classifier(config)
+
+    writer = csv.writer(outfile)
+
+    logger.info('Beginning classify in batches')
+    batchsize = 500
+    for i, rev_batch in enumerate(_load_revids_in_batches(infile, batchsize)):
+        logger.info('Get revision text for batch {0}'.format(i))
+        rev_text = rg.get_text_for_revisions(rev_batch)
+        logger.info('Parsing text to wikicode for batch {0}'.format(i))
+        rev_wcode = [(rev_id, mwp.parse(rev_text[rev_id]))
+                     for rev_id in rev_text]
+        batch_revids, wcode_list = zip(*rev_wcode)
+        logger.info('Classifying batch {0}'.format(i))
+        batch_pred = clf.predict(wcode_list)
+        writer.writerows(zip(batch_revids, batch_pred))
+
+
+def _load_revids_in_batches(revfile, batchsize):
+    reader = csv.reader(revfile)
+    for rows in _group(batchsize, reader):
+        yield [r[0] for r in rows]
 
 
 def main():

@@ -7,7 +7,7 @@ feature:
   - name: first_n_words
     class: features.firstnwords.FeatureExtractor
     init_args:
-      n: 40
+      n: 20
   - name: infobox
     class: features.infobox.FeatureExtractor
     init_args: {}

@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.svm import LinearSVC
+from sklearn.ensemble import RandomForestClassifier
 
 
 def _ensure_trained(func):
@@ -19,7 +20,9 @@ class PageClassifier(object):
     def train(self, wikicode_list, labels):
         features = [ext.fit_extract(wikicode_list) for ext in self._fx_exts]
         X = np.concatenate(features, axis=1)
-        self._clf = LinearSVC().fit(X, labels)
+        self._clf = RandomForestClassifier(
+                        class_weight='balanced').fit(X, labels)
+
 
     @_ensure_trained
     def predict(self, wikicode_list):
