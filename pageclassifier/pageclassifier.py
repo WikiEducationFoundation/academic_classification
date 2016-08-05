@@ -23,9 +23,17 @@ class PageClassifier(object):
         self._clf = RandomForestClassifier(
                         class_weight='balanced').fit(X, labels)
 
-
     @_ensure_trained
     def predict(self, wikicode_list):
+        X = self._extract_feature_vectors_from_wikicode_list(wikicode_list)
+        return self._clf.predict(X)
+
+    @_ensure_trained
+    def predict_proba(self, wikicode_list):
+        X = self._extract_feature_vectors_from_wikicode_list(wikicode_list)
+        return self._clf.predict_proba(X)
+
+    def _extract_feature_vectors_from_wikicode_list(self, wikicode_list):
         features = [ext.extract(wikicode_list) for ext in self._fx_exts]
         X = np.concatenate(features, axis=1)
-        return self._clf.predict(X)
+        return X

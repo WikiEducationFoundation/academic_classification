@@ -8,6 +8,8 @@ import csv
 import mwparserfromhell as mwp
 import logging
 import itertools
+import os.path
+from sklearn.metrics import roc_curve, auc
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -90,7 +92,47 @@ def classify(config_file, infile, outfile):
 def _load_revids_in_batches(revfile, batchsize):
     reader = csv.reader(revfile)
     for rows in _group(batchsize, reader):
-        yield [r[0] for r in rows]
+        yield [int(r[0]) for r in rows]
+
+
+def evaluate(config_file, infile, eval_result_dir):
+    config = yaml.load(config_file)
+    clf = build_classifier(config)
+
+    logger.info('Beginning classify in batches')
+    revids = []
+    prob_pred = []
+    labels = []
+    for i, batch_rev_labels in enumerate(
+                        _load_revids_and_labels_in_batches(infile, batchsize)):
+        rev_batch = batch_rev_labels[0]
+        labels.extend(batch_rev_labels[1])
+        logger.info('Get revision text for batch {0}'.format(i))
+        rev_text = rg.get_text_for_revisions(rev_batch)
+        logger.info('Parsing text to wikicode for batch {0}'.format(i))
+        rev_wcode = [(rev_id, mwp.parse(rev_text[rev_id]))
+                     for rev_id in rev_text]
+        batch_revids, wcode_list = zip(*rev_wcode)
+        logger.info('Classifying batch {0}'.format(i))
+        batch_pred = clf.predict_proba(wcode_list)
+        revids.extend(batch_revids)
+        prob_pred.extend(batch_pred)
+
+
+def _record_metrics(prob_pred, labels, eval_results_dir):
+    fpr, tpr, thresholds = roc_curve(labels, prob_pred)
+
+    filepath = os.path.join(eval_results_dir, 'roc.csv')
+    with open(filepath, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerows(zip(fpr, tpr, thresholds))
+
+
+def _load_revids_and_labels_in_batches(revfile, batchsize):
+    reader = csv.reader(revfile)
+    for rows in _group(batchsize, reader):
+
+        yield (zip(*[(int(r[0]), (r[1] == 'True')) for r in rows]))
 
 
 def main():
@@ -110,8 +152,13 @@ def main():
                         nargs='?',
                         type=argparse.FileType('w'),
                         default=sys.stdout)
+    parser.add_argument('-e',
+                        '--evaluate_dir')
     args = parser.parse_args()
-    classify(args.config, args.infile, args.outfile)
+    if not args.evaluate_dir:
+        classify(args.config, args.infile, args.outfile)
+    else:
+            evaluate(args.config, args.infile, args.evaluate_dir)
 
 
 if __name__ == "__main__":
