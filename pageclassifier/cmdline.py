@@ -103,6 +103,7 @@ def evaluate(config_file, infile, eval_result_dir):
     revids = []
     prob_pred = []
     labels = []
+    batchsize = 500
     for i, batch_rev_labels in enumerate(
                         _load_revids_and_labels_in_batches(infile, batchsize)):
         rev_batch = batch_rev_labels[0]
@@ -127,12 +128,16 @@ def _record_metrics(prob_pred, labels, eval_results_dir):
         writer = csv.writer(f)
         writer.writerows(zip(fpr, tpr, thresholds))
 
+    filepath = os.path.join(eval_results_dir, 'stats.txt')
+    with open(filepath, 'w') as f:
+        f.write("AUC: {0}".format(auc(fpr, tpr)))
+
 
 def _load_revids_and_labels_in_batches(revfile, batchsize):
     reader = csv.reader(revfile)
     for rows in _group(batchsize, reader):
-
-        yield (zip(*[(int(r[0]), (r[1] == 'True')) for r in rows]))
+        revids, labels = zip(*[(int(r[0]), (r[1] == 'True')) for r in rows])
+        yield (revids, labels)
 
 
 def main():
