@@ -31,7 +31,7 @@ class PageClassifier(object):
     @_ensure_trained
     def predict_proba(self, wikicode_list):
         X = self._extract_feature_vectors_from_wikicode_list(wikicode_list)
-        return self._clf.predict_proba(X)
+        return [cls1 for cls0, cls1 in self._clf.predict_proba(X)]
 
     def _extract_feature_vectors_from_wikicode_list(self, wikicode_list):
         features = [ext.extract(wikicode_list) for ext in self._fx_exts]

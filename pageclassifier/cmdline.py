@@ -107,28 +107,34 @@ def evaluate(config_file, infile, eval_result_dir):
     for i, batch_rev_labels in enumerate(
                         _load_revids_and_labels_in_batches(infile, batchsize)):
         rev_batch = batch_rev_labels[0]
-        labels.extend(batch_rev_labels[1])
+        label_map = {r: l
+                     for r, l in zip(batch_rev_labels[0], batch_rev_labels[1])}
         logger.info('Get revision text for batch {0}'.format(i))
         rev_text = rg.get_text_for_revisions(rev_batch)
         logger.info('Parsing text to wikicode for batch {0}'.format(i))
-        rev_wcode = [(rev_id, mwp.parse(rev_text[rev_id]))
+        rev_wcode = [(rev_id,
+                      mwp.parse(rev_text[rev_id]),
+                      label_map[rev_id])
                      for rev_id in rev_text]
-        batch_revids, wcode_list = zip(*rev_wcode)
+        batch_revids, wcode_list, batch_labels = zip(*rev_wcode)
         logger.info('Classifying batch {0}'.format(i))
         batch_pred = clf.predict_proba(wcode_list)
         revids.extend(batch_revids)
+        labels.extend(batch_labels)
         prob_pred.extend(batch_pred)
 
+    _record_metrics(prob_pred, labels, eval_result_dir)
 
-def _record_metrics(prob_pred, labels, eval_results_dir):
+
+def _record_metrics(prob_pred, labels, eval_result_dir):
     fpr, tpr, thresholds = roc_curve(labels, prob_pred)
 
-    filepath = os.path.join(eval_results_dir, 'roc.csv')
+    filepath = os.path.join(eval_result_dir, 'roc.csv')
     with open(filepath, 'w') as f:
         writer = csv.writer(f)
         writer.writerows(zip(fpr, tpr, thresholds))
 
-    filepath = os.path.join(eval_results_dir, 'stats.txt')
+    filepath = os.path.join(eval_result_dir, 'stats.txt')
     with open(filepath, 'w') as f:
         f.write("AUC: {0}".format(auc(fpr, tpr)))
 
