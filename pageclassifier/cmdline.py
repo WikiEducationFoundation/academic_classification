@@ -9,7 +9,8 @@ import mwparserfromhell as mwp
 import logging
 import itertools
 import os.path
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve, auc, precision_recall_curve
+from sklearn.metrics import classification_report
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -102,6 +103,7 @@ def evaluate(config_file, infile, eval_result_dir):
     logger.info('Beginning classify in batches')
     revids = []
     prob_pred = []
+    pred = []
     labels = []
     batchsize = 500
     for i, batch_rev_labels in enumerate(
@@ -118,25 +120,34 @@ def evaluate(config_file, infile, eval_result_dir):
                      for rev_id in rev_text]
         batch_revids, wcode_list, batch_labels = zip(*rev_wcode)
         logger.info('Classifying batch {0}'.format(i))
-        batch_pred = clf.predict_proba(wcode_list)
+        batch_prob_pred = clf.predict_proba(wcode_list)
+        batch_pred = clf.predict(wcode_list)
         revids.extend(batch_revids)
         labels.extend(batch_labels)
-        prob_pred.extend(batch_pred)
+        prob_pred.extend(batch_prob_pred)
+        pred.extend(batch_pred)
 
-    _record_metrics(prob_pred, labels, eval_result_dir)
+    _record_metrics(prob_pred, pred, labels, eval_result_dir)
 
 
-def _record_metrics(prob_pred, labels, eval_result_dir):
+def _record_metrics(prob_pred, pred, labels, eval_result_dir):
     fpr, tpr, thresholds = roc_curve(labels, prob_pred)
+    precision, recall, pr_thresh = precision_recall_curve(labels, prob_pred)
 
     filepath = os.path.join(eval_result_dir, 'roc.csv')
     with open(filepath, 'w') as f:
         writer = csv.writer(f)
         writer.writerows(zip(fpr, tpr, thresholds))
 
+    filepath = os.path.join(eval_result_dir, 'prec_recall.csv')
+    with open(filepath, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerows(zip(precision, recall, pr_thresh))
+
     filepath = os.path.join(eval_result_dir, 'stats.txt')
     with open(filepath, 'w') as f:
-        f.write("AUC: {0}".format(auc(fpr, tpr)))
+        f.write("AUC: {0}\n".format(auc(fpr, tpr)))
+        f.write(classification_report(labels, pred))
 
 
 def _load_revids_and_labels_in_batches(revfile, batchsize):

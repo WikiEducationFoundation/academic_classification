@@ -57,7 +57,9 @@ class FeatureExtractor(object):
 
     def fit_extract(self, wikicode_list):
         first_n_words = _transform(self._n, wikicode_list)
-        self._vectorizer = TfidfVectorizer(min_df=0.01, max_df=0.15)
+        self._vectorizer = TfidfVectorizer(min_df=0.01,
+                                           max_df=0.15,
+                                           stop_words='english')
         X = self._vectorizer.fit_transform(first_n_words)
         return X.toarray()
 
