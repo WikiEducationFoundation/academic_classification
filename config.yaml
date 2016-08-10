@@ -1,4 +1,5 @@
-training_file: training_data/academic_revision_data.csv
+training_file: training_data/single_rating_train.csv
+# training_file: training_data/mini.csv
 feature:
   - name: ref_ratio
     class: features.refratio.FeatureExtractor
@@ -11,3 +12,17 @@ feature:
   - name: infobox
     class: features.infobox.FeatureExtractor
     init_args: {}
+  - name: word_type_ratio
+    class: features.wordtyperatio.FeatureExtractor
+    init_args:
+      wordtype_filepaths:
+        - resources/academic_words_sl01.csv
+        - resources/academic_words_sl02.csv
+        - resources/academic_words_sl03.csv
+        - resources/academic_words_sl04.csv
+        - resources/academic_words_sl05.csv
+        - resources/academic_words_sl06.csv
+        - resources/academic_words_sl07.csv
+        - resources/academic_words_sl08.csv
+        - resources/academic_words_sl09.csv
+        - resources/academic_words_sl10.csv
