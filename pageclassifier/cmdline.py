@@ -90,6 +90,18 @@ def classify(config_file, infile, outfile):
         writer.writerows(zip(batch_revids, batch_pred))
 
 
+def _parse_revs_into_wcode(rev_text_dict):
+    result = []
+    for rev_id in rev_text_dict:
+        try:
+            result.append((rev_id, mwp.parse(rev_text[rev_id])))
+        except mwp.parser.ParserError as e:
+            logger.warning(e)
+            logger.warning('Error parsing {0}'.format(rev_id))
+            result.append((rev_id, mwp.parse('')))
+    return result
+
+
 def _load_revids_in_batches(revfile, batchsize):
     reader = csv.reader(revfile)
     for rows in _group(batchsize, reader):
