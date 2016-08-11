@@ -48,7 +48,6 @@ class PageClassifier(object):
         # return [cls1 for cls0, cls1 in self._clf.predict_proba(X)]
         return self._clf.decision_function(X)
 
-
     def _extract_feature_vectors_from_wikicode_list(self, wikicode_list):
         features = [ext.extract(wikicode_list) for ext in self._fx_exts]
         X = np.concatenate(features, axis=1)

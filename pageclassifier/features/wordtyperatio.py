@@ -35,5 +35,6 @@ class FeatureExtractor(object):
         words = utils.select_words_from_wikicode(wikicode)
         wordset = set([w.lower() for w in words])
         for typeset in self._wordtypes:
-            result.append(len(wordset.difference(typeset))/len(wordset))
+            num_words = max(1, len(wordset))
+            result.append(len(wordset.difference(typeset))/num_words)
         return result
