@@ -82,8 +82,7 @@ def classify(config_file, infile, outfile):
         logger.info('Get revision text for batch {0}'.format(i))
         rev_text = rg.get_text_for_revisions(rev_batch)
         logger.info('Parsing text to wikicode for batch {0}'.format(i))
-        rev_wcode = [(rev_id, mwp.parse(rev_text[rev_id]))
-                     for rev_id in rev_text]
+        rev_wcode = _parse_revs_into_wcode(rev_text)
         batch_revids, wcode_list = zip(*rev_wcode)
         logger.info('Classifying batch {0}'.format(i))
         batch_pred = clf.predict(wcode_list)
@@ -94,7 +93,7 @@ def _parse_revs_into_wcode(rev_text_dict):
     result = []
     for rev_id in rev_text_dict:
         try:
-            result.append((rev_id, mwp.parse(rev_text[rev_id])))
+            result.append((rev_id, mwp.parse(rev_text_dict[rev_id])))
         except mwp.parser.ParserError as e:
             logger.warning(e)
             logger.warning('Error parsing {0}'.format(rev_id))
